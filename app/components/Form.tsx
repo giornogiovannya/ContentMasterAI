@@ -1,7 +1,6 @@
 "use client"
 import React, { useState } from 'react';
 import { TextField, Switch, FormControlLabel, Button, Box, Grid, Pagination, Modal, Typography } from '@mui/material';
-import { sql } from "@vercel/postgres"; // Импортируем sql
 
 const InputForm = () => {
   const [manualMode, setManualMode] = useState(false);
@@ -16,6 +15,24 @@ const InputForm = () => {
   const articlesPerPage = 10; // Увеличено количество статей на странице
   const [openModal, setOpenModal] = useState(false);
   const [selectedArticle, setSelectedArticle] = useState("");
+
+  const trendingThemes = [
+    "Технологии и инновации",
+    "Экология и устойчивое развитие",
+    "Здоровье и фитнес",
+    "Культура и искусство",
+    "Финансовая грамотность",
+    "Путешествия и туризм",
+    "Образование и саморазвитие",
+    "Социальные сети и влияние",
+    "Кибербезопасность",
+    "Искусственный интеллект",
+    "Мода и стиль",
+    "Психология и личностный рост",
+    "Спорт и активный образ жизни",
+    "Кулинария и гастрономия",
+    "Научные открытия и исследования"
+  ];
 
   const handleSwitchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setManualMode(event.target.checked);
@@ -80,9 +97,16 @@ const InputForm = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    let selectedTheme = autoTheme;
+
+    if (!manualMode) {
+      selectedTheme = trendingThemes[Math.floor(Math.random() * trendingThemes.length)];
+      alert(`Выбранная тема: ${selectedTheme}`);
+    }
+
     const requestBody = manualMode 
       ? buildRequestManual(authorName, bio, vocabulary, theme, tone) 
-      : buildRequestAuto(authorName, autoTheme); // Используем новое состояние для темы в авторежиме
+      : buildRequestAuto(authorName, selectedTheme); // Используем автоматически выбранную тему
     
     const response = await fetch('https://api.proxyapi.ru/openai/v1/chat/completions', {
       method: 'POST',
@@ -115,12 +139,6 @@ const InputForm = () => {
   const handleCloseModal = () => {
     setOpenModal(false);
     setSelectedArticle("");
-  };
-
-  // Функция для получения пользователей
-  const fetchUsers = async () => {
-    const { rows } = await sql`SELECT * FROM users;`; // Запрос для получения всех пользователей
-    alert(JSON.stringify(rows)); // Выводим пользователей в alert
   };
 
   return (
@@ -254,6 +272,7 @@ const InputForm = () => {
           fullWidth 
           value={autoTheme}
           onChange={(e) => setAutoTheme(e.target.value)}
+          disabled // Поле выключено
           sx={{ 
             width: '250px', // Узкое поле для тематики в авторежиме
             borderRadius: '8px', 
@@ -272,7 +291,6 @@ const InputForm = () => {
         />
       )}
       <Button variant="contained" color="primary" onClick={handleSubmit}>Отправить</Button>
-      <Button variant="contained" color="secondary" onClick={fetchUsers}>Показать пользователей</Button> {/* Кнопка для показа пользователей */}
       <Grid container spacing={2} sx={{ marginTop: 2 }}>
         {currentArticles.map((article, index) => (
           <Grid item xs={2.4} key={index}> {/* Изменено на 2.4 для 5 статей в ряду */}
