@@ -8,11 +8,12 @@ const InputForm = () => {
   const [bio, setBio] = useState("");
   const [vocabulary, setVocabulary] = useState("");
   const [theme, setTheme] = useState("");
-  const [autoTheme, setAutoTheme] = useState(""); // Новое состояние для темы в авторежиме
+  const [autoTheme, setAutoTheme] = useState("");
   const [tone, setTone] = useState("формальный");
+  const [length, setLength] = useState(0);
   const [articles, setArticles] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const articlesPerPage = 10; // Увеличено количество статей на странице
+  const articlesPerPage = 10;
   const [openModal, setOpenModal] = useState(false);
   const [selectedArticle, setSelectedArticle] = useState("");
 
@@ -38,7 +39,7 @@ const InputForm = () => {
     setManualMode(event.target.checked);
   };
 
-  const buildRequestManual = (name: string, biography: string, phrases: string, theme: string, tone: string) => {
+  const buildRequestManual = (name: string, biography: string, phrases: string, theme: string, tone: string, length: number) => {
     const prompt = `===Instruction
     Твоя задача на основании контекста ты должен написать статью...
 
@@ -48,6 +49,7 @@ const InputForm = () => {
     Словарный запас: ${phrases}
     Тематика (специализация): ${theme}
     Тональность текста: ${tone}
+    Длина статьи: ${length} слов
     
     ===Output
     Response must be JSON only without additional text
@@ -63,7 +65,7 @@ const InputForm = () => {
         {"role": "system", "content": "You are ChatGPT, a helpful assistant."},
         {"role": "user", "content": prompt}
       ],
-      max_tokens: 1000,
+      max_tokens: 5000,
       temperature: 0.7
     };
   };
@@ -90,7 +92,7 @@ const InputForm = () => {
         {"role": "system", "content": "You are ChatGPT, a helpful assistant."},
         {"role": "user", content: prompt}
       ],
-      max_tokens: 500,
+      max_tokens: 5000,
       temperature: 0.7
     };
   };
@@ -105,8 +107,8 @@ const InputForm = () => {
     }
 
     const requestBody = manualMode 
-      ? buildRequestManual(authorName, bio, vocabulary, theme, tone) 
-      : buildRequestAuto(authorName, selectedTheme); // Используем автоматически выбранную тему
+      ? buildRequestManual(authorName, bio, vocabulary, theme, tone, length) 
+      : buildRequestAuto(authorName, selectedTheme);
     
     const response = await fetch('https://api.proxyapi.ru/openai/v1/chat/completions', {
       method: 'POST',
@@ -151,7 +153,7 @@ const InputForm = () => {
       <TextField 
         label="Имя" 
         variant="outlined" 
-        sx={{ width: '250px' }} // Узкое поле для имени
+        sx={{ width: '250px' }}
         value={authorName}
         onChange={(e) => setAuthorName(e.target.value)}
         InputProps={{
@@ -182,7 +184,7 @@ const InputForm = () => {
             value={bio}
             onChange={(e) => setBio(e.target.value)}
             sx={{ 
-              width: '250px', // Узкое поле для биографии
+              width: '250px', 
               borderRadius: '8px', 
               '& .MuiOutlinedInput-root': {
                 '& fieldset': {
@@ -204,7 +206,7 @@ const InputForm = () => {
             value={vocabulary}
             onChange={(e) => setVocabulary(e.target.value)}
             sx={{ 
-              width: '250px', // Узкое поле для словарного запаса
+              width: '250px', 
               borderRadius: '8px', 
               '& .MuiOutlinedInput-root': {
                 '& fieldset': {
@@ -226,7 +228,7 @@ const InputForm = () => {
             value={theme}
             onChange={(e) => setTheme(e.target.value)}
             sx={{ 
-              width: '250px', // Узкое поле для тематики
+              width: '250px', 
               borderRadius: '8px', 
               '& .MuiOutlinedInput-root': {
                 '& fieldset': {
@@ -248,7 +250,30 @@ const InputForm = () => {
             value={tone}
             onChange={(e) => setTone(e.target.value)}
             sx={{ 
-              width: '250px', // Узкое поле для тональности
+              width: '250px', 
+              borderRadius: '8px', 
+              '& .MuiOutlinedInput-root': {
+                '& fieldset': {
+                  borderColor: 'silver',
+                },
+                '&:hover fieldset': {
+                  borderColor: 'silver',
+                },
+                '&.Mui-focused fieldset': {
+                  borderColor: 'silver',
+                },
+              },
+            }} 
+          />
+          <TextField 
+            label="Длина статьи (токены)" 
+            variant="outlined" 
+            fullWidth 
+            type="number" 
+            value={length}
+            onChange={(e) => setLength(Number(e.target.value))}
+            sx={{ 
+              width: '250px', 
               borderRadius: '8px', 
               '& .MuiOutlinedInput-root': {
                 '& fieldset': {
@@ -265,16 +290,16 @@ const InputForm = () => {
           />
         </>
       )}
-      {!manualMode && ( // Поле для ввода темы в авторежиме
+      {!manualMode && (
         <TextField 
           label="Тематика (авторежим)" 
           variant="outlined" 
           fullWidth 
           value={autoTheme}
           onChange={(e) => setAutoTheme(e.target.value)}
-          disabled // Поле выключено
+          disabled
           sx={{ 
-            width: '250px', // Узкое поле для тематики в авторежиме
+            width: '250px', 
             borderRadius: '8px', 
             '& .MuiOutlinedInput-root': {
               '& fieldset': {
@@ -293,26 +318,26 @@ const InputForm = () => {
       <Button variant="contained" color="primary" onClick={handleSubmit}>Отправить</Button>
       <Grid container spacing={2} sx={{ marginTop: 2 }}>
         {currentArticles.map((article, index) => (
-          <Grid item xs={2.4} key={index}> {/* Изменено на 2.4 для 5 статей в ряду */}
+          <Grid item xs={2.4} key={index}>
             <Box 
               sx={{ 
                 border: '1px solid silver', 
                 padding: 1, 
-                borderRadius: '16px', // Сильно скругленные края
+                borderRadius: '16px', 
                 cursor: 'pointer', 
                 width: '200px', 
                 height: '200px', 
-                overflow: 'hidden', // Добавлено для предотвращения переполнения
-                boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)', // Тень
-                transition: 'transform 0.2s', // Плавный переход
+                overflow: 'hidden', 
+                boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)', 
+                transition: 'transform 0.2s', 
                 '&:hover': {
-                  transform: 'scale(1.05)', // Увеличение при наведении
+                  transform: 'scale(1.05)', 
                 },
               }} 
               onClick={() => handleOpenModal(article)}
             >
               <Typography variant="body2" sx={{ height: '100%', display: 'flex', alignItems: 'flex-start', justifyContent: 'flex-start', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'normal' }}>
-                {article} {/* Превью статьи занимает всю карточку и заканчивается многоточием */}
+                {article}
               </Typography>
             </Box>
           </Grid>
@@ -336,9 +361,9 @@ const InputForm = () => {
           borderRadius: 2,
           maxWidth: 600,
           margin: 'auto',
-          marginTop: '15vh', // Изменено для поднятия модального окна выше
-          overflowY: 'scroll', // Добавлено для прокрутки
-          maxHeight: '80vh' // Ограничение высоты модального окна
+          marginTop: '15vh', 
+          overflowY: 'scroll', 
+          maxHeight: '80vh' 
         }}>
           <Typography variant="h6" component="h2">
             Полная статья
