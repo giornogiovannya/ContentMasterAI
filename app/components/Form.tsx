@@ -11,7 +11,6 @@ const InputForm = () => {
   const [theme, setTheme] = useState("");
   const [autoTheme, setAutoTheme] = useState(""); // Новое состояние для темы в авторежиме
   const [tone, setTone] = useState("формальный");
-  const [generatedArticle, setGeneratedArticle] = useState("");
   const [articles, setArticles] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const articlesPerPage = 10; // Увеличено количество статей на странице
@@ -97,7 +96,6 @@ const InputForm = () => {
     const articleText = data.choices[0].message.content;
     const parsedData = JSON.parse(articleText);
     const article = parsedData.article;
-    setGeneratedArticle(article);
     setArticles((prevArticles) => [...prevArticles, article]);
   };
 
