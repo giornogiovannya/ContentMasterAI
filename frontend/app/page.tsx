@@ -1,8 +1,6 @@
 import InputForm from './components/Form';
-import WordCloud from './components/WordCloud';
 import { sql } from '@vercel/postgres';
 import WordsContainer from './ss.js';
-import zIndex from '@mui/material/styles/zIndex';
 
 async function getPosts() {
     const { rows } = await sql`SELECT * FROM users;`;
