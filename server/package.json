@@ -12,7 +12,12 @@
     "@emotion/react": "^11.13.3",
     "@emotion/styled": "^11.13.0",
     "@mui/material": "^6.1.0",
+    "@prisma/client": "^5.20.0",
+    "@vercel/next": "^4.3.10",
+    "@vercel/node": "^3.2.16",
     "@vercel/postgres": "^0.10.0",
+    "cors": "^2.8.5",
+    "express": "^4.21.0",
     "next": "^14.2.11",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
